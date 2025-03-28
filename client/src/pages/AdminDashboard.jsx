@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import ProjectForm from "../components/ProjectForm";
 
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = "https://ganesh-ekhe.onrender.com";
 
 const AdminDashboard = () => {
   const [projects, setProjects] = useState([]);

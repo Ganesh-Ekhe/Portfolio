@@ -1,93 +1,77 @@
 import { useState, useEffect } from "react";
 
-const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [techStack, setTechStack] = useState("");
-  const [liveLink, setLiveLink] = useState("");
-  const [githubLink, setGithubLink] = useState("");
-  const [image, setImage] = useState(null); // Image File
-  const [preview, setPreview] = useState(""); // Preview Image
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // ✅ If Editing, Set Previous Data
+const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    techStack: "",
+    liveLink: "",
+    githubLink: "",
+    image: null,
+    preview: ""
+  });
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     if (editingProject) {
-      setTitle(editingProject.title);
-      setDescription(editingProject.description);
-      setTechStack(editingProject.techStack);
-      setLiveLink(editingProject.liveLink);
-      setGithubLink(editingProject.githubLink);
-      setPreview(editingProject.image || ""); // Existing Image Preview
+      setFormData({ ...editingProject, image: null, preview: editingProject.image || "" });
+    } else {
+      setFormData({ title: "", description: "", techStack: "", liveLink: "", githubLink: "", image: null, preview: "" });
     }
   }, [editingProject]);
 
-  // ✅ Handle Image Upload
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    setImage(file);
-    setPreview(URL.createObjectURL(file)); // Show Image Preview
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Handle Submit (Add or Update)
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({ ...prev, image: file, preview: URL.createObjectURL(file) }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    try {
+      let imageUrl = formData.preview;
 
-    let imageUrl = editingProject ? editingProject.image : ""; // Default to existing image
-
-    // ✅ If a new image is uploaded, send it to backend
-    if (image) {
-      const formData = new FormData();
-      formData.append("image", image);
-
-      try {
-        const imageResponse = await fetch("http://localhost:9000/api/upload", {
-          method: "POST",
-          body: formData,
-        });
+      if (formData.image) {
+        const formDataImage = new FormData();
+        formDataImage.append("image", formData.image);
+        const imageResponse = await fetch(`${backendUrl}/api/upload`, { method: "POST", body: formDataImage });
         const imageData = await imageResponse.json();
         if (!imageData.success) throw new Error("Image upload failed");
-        imageUrl = imageData.imageUrl; // Get new uploaded image URL
-      } catch (error) {
-        console.error("Image Upload Error:", error);
-        return;
+        imageUrl = imageData.imageUrl;
       }
-    }
 
-    // ✅ Send Request for Add or Update
-    const requestData = {
-      title,
-      description,
-      techStack,
-      image: imageUrl, // Use uploaded or existing image URL
-      liveLink,
-      githubLink,
-    };
+      const requestData = { ...formData, image: imageUrl };
+      delete requestData.preview; delete requestData.image;
 
-    try {
-      let response;
-      if (editingProject) {
-        // ✅ Update Existing Project
-        response = await fetch(`http://localhost:9000/api/projects/${editingProject._id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestData),
-        });
-      } else {
-        // ✅ Create New Project
-        response = await fetch("http://localhost:9000/api/projects", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestData),
-        });
-      }
+      const url = editingProject ? `${backendUrl}/api/projects/${editingProject._id}` : `${backendUrl}/api/projects`;
+      const method = editingProject ? "PUT" : "POST";
+      
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+      });
 
       const result = await response.json();
-      if (!result.success) throw new Error("Failed to save project");
+      if (!result.success) throw new Error(result.message || "Failed to save project");
 
-      fetchProjects(); // Refresh Projects List
-      setEditingProject(null); // Reset Editing
+      alert(editingProject ? "Project Updated Successfully!" : "Project Added Successfully!");
+      fetchProjects();
+      setEditingProject(null);
     } catch (error) {
       console.error("Error:", error);
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,17 +79,18 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">{editingProject ? "Edit Project" : "Add Project"}</h2>
 
-      <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Project Title" required className="w-full p-2 border rounded" />
-      <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Project Description" required className="w-full p-2 border rounded mt-2"></textarea>
-      <input type="text" value={techStack} onChange={(e) => setTechStack(e.target.value)} placeholder="Tech Stack" required className="w-full p-2 border rounded mt-2" />
-      <input type="text" value={liveLink} onChange={(e) => setLiveLink(e.target.value)} placeholder="Live Demo Link" className="w-full p-2 border rounded mt-2" />
-      <input type="text" value={githubLink} onChange={(e) => setGithubLink(e.target.value)} placeholder="GitHub Link" className="w-full p-2 border rounded mt-2" />
+      <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Project Title" required className="w-full p-2 border rounded" />
+      <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Project Description" required className="w-full p-2 border rounded mt-2"></textarea>
+      <input type="text" name="techStack" value={formData.techStack} onChange={handleChange} placeholder="Tech Stack" required className="w-full p-2 border rounded mt-2" />
+      <input type="text" name="liveLink" value={formData.liveLink} onChange={handleChange} placeholder="Live Demo Link" className="w-full p-2 border rounded mt-2" />
+      <input type="text" name="githubLink" value={formData.githubLink} onChange={handleChange} placeholder="GitHub Link" className="w-full p-2 border rounded mt-2" />
 
-      {/* ✅ Image Upload */}
       <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full p-2 border rounded mt-2" />
-      {preview && <img src={preview} alt="Preview" className="w-full h-32 object-cover rounded mt-2" />}
+      {formData.preview && <img src={formData.preview} alt="Preview" className="w-full h-32 object-cover rounded mt-2" />}
 
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded mt-4">{editingProject ? "Update Project" : "Save Project"}</button>
+      <button type="submit" disabled={loading} className="bg-blue-500 text-white px-4 py-2 rounded mt-4">
+        {loading ? "Processing..." : editingProject ? "Update Project" : "Save Project"}
+      </button>
     </form>
   );
 };
