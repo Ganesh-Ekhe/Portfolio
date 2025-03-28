@@ -18,9 +18,26 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
     if (editingProject) {
       setFormData({ ...editingProject, image: null, preview: editingProject.image || "" });
     } else {
-      setFormData({ title: "", description: "", techStack: "", liveLink: "", githubLink: "", image: null, preview: "" });
+      resetForm();
     }
   }, [editingProject]);
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      techStack: "",
+      liveLink: "",
+      githubLink: "",
+      image: null,
+      preview: ""
+    });
+  };
+
+  const validateUrl = (url) => {
+    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+    return urlPattern.test(url);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +54,19 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    if (formData.liveLink && !validateUrl(formData.liveLink)) {
+      alert("Invalid Live Demo Link URL");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.githubLink && !validateUrl(formData.githubLink)) {
+      alert("Invalid GitHub Link URL");
+      setLoading(false);
+      return;
+    }
+
     try {
       let imageUrl = formData.preview;
 
@@ -45,7 +75,7 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
         formDataImage.append("image", formData.image);
         const imageResponse = await fetch(`${backendUrl}/api/upload`, { method: "POST", body: formDataImage });
         const imageData = await imageResponse.json();
-        if (!imageData.success) throw new Error("Image upload failed");
+        if (!imageData.success) throw new Error(imageData.message || "Image upload failed");
         imageUrl = imageData.imageUrl;
       }
 
@@ -54,7 +84,7 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
 
       const url = editingProject ? `${backendUrl}/api/projects/${editingProject._id}` : `${backendUrl}/api/projects`;
       const method = editingProject ? "PUT" : "POST";
-      
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -66,6 +96,7 @@ const ProjectForm = ({ fetchProjects, editingProject, setEditingProject }) => {
 
       alert(editingProject ? "Project Updated Successfully!" : "Project Added Successfully!");
       fetchProjects();
+      resetForm();
       setEditingProject(null);
     } catch (error) {
       console.error("Error:", error);
