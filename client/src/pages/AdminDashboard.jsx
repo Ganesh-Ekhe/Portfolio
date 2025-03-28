@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import ProjectForm from "../components/ProjectForm";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const AdminDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
@@ -16,7 +18,7 @@ const AdminDashboard = () => {
   // Fetch Projects
   const fetchProjects = async () => {
     try {
-      const response = await fetch("http://localhost:9000/api/projects");
+      const response = await fetch(`${apiUrl}/api/projects`);
       const data = await response.json();
       console.log("Projects Data:", data);
 
@@ -30,7 +32,7 @@ const AdminDashboard = () => {
   // Fetch Users
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://localhost:9000/api/users");
+      const response = await fetch(`${apiUrl}/api/users`);
       const data = await response.json();
       setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -43,7 +45,7 @@ const AdminDashboard = () => {
   const deleteProject = async (id) => {
     if (!window.confirm("Are you sure?")) return;
     try {
-      const response = await fetch(`http://localhost:9000/api/projects/${id}`, { method: "DELETE" });
+      const response = await fetch(`${apiUrl}/api/projects/${id}`, { method: "DELETE" });
 
       if (response.ok) {
         setProjects(projects.filter((project) => project._id !== id));
@@ -59,7 +61,6 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
       <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white">Admin Dashboard</h2>
 
-      {/* Project Form */}
       <ProjectForm fetchProjects={fetchProjects} editingProject={editingProject} setEditingProject={setEditingProject} />
 
       {/* Projects Section */}
@@ -75,7 +76,7 @@ const AdminDashboard = () => {
               >
                 {project.image && (
                   <img
-                    src={`http://localhost:9000${project.image}`} // ✅ Corrected Image Path
+                    src={`${apiUrl}${project.image}`}
                     alt={project.title}
                     className="w-full h-40 object-cover rounded-lg"
                   />

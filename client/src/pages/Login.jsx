@@ -5,22 +5,26 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error
+    setError("");
+    setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:9000/api/users/login", {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, {
         email,
         password,
       });
 
-      localStorage.setItem("token", res.data.token); // Save JWT Token
+      sessionStorage.setItem("token", res.data.token); // Use sessionStorage for security
       alert("✅ Login Successful!");
-      window.location.href = "/dashboard"; // Redirect
+      window.location.href = "/dashboard";
     } catch (err) {
       setError(err.response?.data?.message || "❌ Login Failed! Check your credentials.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,10 +33,9 @@ const Login = () => {
       <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-96 text-white">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
-        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+        {error && <p className="text-red-400 text-sm text-center animate-pulse">{error}</p>}
 
         <form onSubmit={handleLogin} className="space-y-4">
-          {/* Email Input */}
           <div>
             <label className="block text-sm font-semibold">Email</label>
             <input
@@ -44,8 +47,7 @@ const Login = () => {
               required
             />
           </div>
-          
-          {/* Password Input */}
+
           <div>
             <label className="block text-sm font-semibold">Password</label>
             <input
@@ -58,18 +60,17 @@ const Login = () => {
             />
           </div>
 
-          {/* Login Button */}
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300"
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        {/* Signup Link */}
         <p className="mt-4 text-center text-sm">
-          Don't have an account?{" "}
+          Don't have an account?{' '}
           <a href="/signup" className="text-blue-400 hover:underline">
             Sign up
           </a>
