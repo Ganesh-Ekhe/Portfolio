@@ -6,9 +6,9 @@
  "scripts": {
   "dev": "vite",
   "build": "vite build",
+  "start": "vite preview --host --port $PORT",
   "lint": "eslint .",
-  "preview": "vite preview",
-  "start": "vite preview --port 10000"
+  "preview": "vite preview"
 },
 
   "dependencies": {
