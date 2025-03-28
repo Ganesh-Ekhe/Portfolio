@@ -1,6 +1,6 @@
 // Navbar.jsx
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 const Navbar = () => {
@@ -8,6 +8,7 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -21,6 +22,7 @@ const Navbar = () => {
     localStorage.removeItem('isAdmin');
     setIsLoggedIn(false);
     setIsAdmin(false);
+    navigate('/login');
   };
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -57,8 +59,14 @@ const Navbar = () => {
           ))}
           {isLoggedIn ? (
             <>
-              {isAdmin && <Link to="/admin" className="text-gray-300 hover:text-white">Admin Dashboard</Link>}
-              <button onClick={handleLogout} className="text-gray-300 hover:text-white">Logout</button>
+              {isAdmin && (
+                <Link to="/admin" className="text-gray-300 hover:text-white">
+                  Admin Dashboard
+                </Link>
+              )}
+              <button onClick={handleLogout} className="text-gray-300 hover:text-white">
+                Logout
+              </button>
             </>
           ) : (
             <Link to="/login" className="text-gray-300 hover:text-white">Login</Link>
@@ -76,7 +84,11 @@ const Navbar = () => {
           ))}
           {isLoggedIn ? (
             <>
-              {isAdmin && <Link to="/admin" onClick={toggleMenu} className="block text-gray-300 hover:text-white">Admin Dashboard</Link>}
+              {isAdmin && (
+                <Link to="/admin" onClick={toggleMenu} className="block text-gray-300 hover:text-white">
+                  Admin Dashboard
+                </Link>
+              )}
               <button onClick={handleLogout} className="block text-gray-300 hover:text-white">Logout</button>
             </>
           ) : (

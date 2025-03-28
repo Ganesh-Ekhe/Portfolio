@@ -7,10 +7,14 @@ import Skills from './pages/Skills';
 import Projects from './pages/Projects';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
+import AdminDashboard from './pages/AdminDashboard';
 import Footer from './pages/Footer';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 const App = () => {
+  const isLoggedIn = localStorage.getItem('token');
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
   return (
     <div className="App">
       <Navbar />
@@ -21,7 +25,12 @@ const App = () => {
           <Route path="/skills" element={<Skills />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
+          {/* Admin Route - फक्त Admin ला दिसेल */}
+          <Route
+            path="/admin"
+            element={isLoggedIn && isAdmin ? <AdminDashboard /> : <Navigate to="/login" />}
+          />
         </Routes>
       </main>
       <Footer />
