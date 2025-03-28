@@ -1,4 +1,3 @@
-
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
@@ -16,18 +15,21 @@ dotenv.config();
 const app = express();
 
 // ✅ Middleware
-app.use(cors());
+app.use(cors({
+  origin: ["https://ganesh-ekhe-portfolio.onrender.com"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // ✅ Serve Static Files (Uploaded Images)
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
-
-
 // ✅ Routes
 app.use("/api/users" , userRoutes);
-app.use("/api/contact",contactRoutes);
+app.use("/api/contact", contactRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
@@ -65,15 +67,11 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-
-
 // MongoDB Connect
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❗ MongoDB Connection Error:", err));
 
-
 const PORT = process.env.PORT || 9000;
 // Start Server
-app.listen(PORT, () => console.log(` Server running on ${PORT}`));
-
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
