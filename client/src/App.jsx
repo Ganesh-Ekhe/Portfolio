@@ -2,7 +2,7 @@
 import './App.css';
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+
 import Home from './pages/Home';
 import About from './pages/About';
 import Skills from './pages/Skills';
@@ -11,11 +11,12 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import Footer from './pages/Footer';
+import Navbar from './pages/Navbar';
 
 const App = () => {
   return (
     <div className="App">
-      <Navbar />
+      <Navbar/>
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
