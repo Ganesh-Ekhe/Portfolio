@@ -27,6 +27,7 @@ const Navbar = () => {
     { path: '/about', label: 'About' },
     { path: '/skills', label: 'Skills' },
     { path: '/contact', label: 'Contact' },
+    
   ];
 
   return (
@@ -53,7 +54,7 @@ const Navbar = () => {
           ))}
           {isLoggedIn ? (
             <>
-              <Link to="/admin" className="text-gray-300 hover:text-white">Admin Dashboard</Link>
+              <Link to="/AdminDashboard" className="text-gray-300 hover:text-white">Admin Dashboard</Link>
               <button onClick={handleLogout} className="text-gray-300 hover:text-white">Logout</button>
             </>
           ) : (
@@ -77,7 +78,7 @@ const Navbar = () => {
           ))}
           {isLoggedIn ? (
             <>
-              <Link to="/admin" className="block text-gray-300 hover:text-white">Admin Dashboard</Link>
+              <Link to="/AdminDashboard" className="block text-gray-300 hover:text-white">Admin Dashboard</Link>
               <button onClick={handleLogout} className="block text-gray-300 hover:text-white">Logout</button>
             </>
           ) : (
