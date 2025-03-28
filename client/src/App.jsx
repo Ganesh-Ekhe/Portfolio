@@ -28,7 +28,7 @@ const App = () => {
           <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
           {/* Admin Route - फक्त Admin ला दिसेल */}
           <Route
-            path="/admin"
+            path="/dashboard"
             element={isLoggedIn && isAdmin ? <AdminDashboard /> : <Navigate to="/login" />}
           />
         </Routes>
